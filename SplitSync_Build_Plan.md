@@ -13,7 +13,7 @@
 |---|---|---|
 | 0 | Environment & Repo Setup | ✅ DONE — 2026-10-03 |
 | 1 | Auth (Backend + Frontend) | ✅ DONE — 2026-10-03 |
-| 2 | Groups | ⬜ TODO |
+| 2 | Groups | ✅ DONE — 2026-10-03 |
 | 3 | Expenses | ⬜ TODO |
 | 4 | Balance Engine + Debt Algorithm | ⬜ TODO |
 | 5 | Settlements | ⬜ TODO |
@@ -88,7 +88,7 @@ splitwise/
 
 ---
 
-## ⬜ Phase 2 — Groups
+## ✅ Phase 2 — Groups
 
 ### 2A — Backend Groups
 
