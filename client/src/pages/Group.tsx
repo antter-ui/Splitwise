@@ -29,6 +29,7 @@ import {
   CheckCircle2,
   PieChart,
   Activity,
+  Download,
 } from 'lucide-react';
 
 export const GroupPage: React.FC = () => {
@@ -147,6 +148,29 @@ export const GroupPage: React.FC = () => {
     setSettleRecipientId(recipientId);
     setSettleAmount(amount);
     setShowSettleModal(true);
+  };
+
+  const exportExpensesCSV = () => {
+    if (!expenses || expenses.length === 0) return;
+    const headers = ['Date', 'Description', 'Category', 'Paid By', 'Total Amount', 'Currency', 'Split Type'];
+    const rows = expenses.map((e) => [
+      new Date(e.createdAt).toLocaleDateString(),
+      `"${(e.description || '').replace(/"/g, '""')}"`,
+      `"${(e.category || 'General').replace(/"/g, '""')}"`,
+      `"${(e.paidBy?.name || 'Unknown').replace(/"/g, '""')}"`,
+      e.amount.toFixed(2),
+      e.currency,
+      e.splitType,
+    ]);
+    const csvContent =
+      'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', `${group.name.replace(/\s+/g, '_')}_expenses.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   const getInitials = (name?: string) => {
@@ -415,13 +439,26 @@ export const GroupPage: React.FC = () => {
                     </p>
                   </div>
 
-                  <button
-                    onClick={() => setShowAddExpense(true)}
-                    className="px-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-md shadow-indigo-500/20 cursor-pointer transition-all"
-                  >
-                    <PlusCircle className="w-4 h-4" />
-                    <span>Add Expense</span>
-                  </button>
+                  <div className="flex items-center gap-2">
+                    {expenses && expenses.length > 0 && (
+                      <button
+                        onClick={exportExpensesCSV}
+                        className="px-3 py-2 bg-gray-900 hover:bg-gray-800 text-gray-300 hover:text-white border border-gray-700/80 rounded-xl text-xs font-medium flex items-center gap-1.5 cursor-pointer transition-all"
+                        title="Download expenses as CSV"
+                      >
+                        <Download className="w-4 h-4 text-indigo-400" />
+                        <span className="hidden sm:inline">Export CSV</span>
+                      </button>
+                    )}
+
+                    <button
+                      onClick={() => setShowAddExpense(true)}
+                      className="px-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-md shadow-indigo-500/20 cursor-pointer transition-all"
+                    >
+                      <PlusCircle className="w-4 h-4" />
+                      <span>Add Expense</span>
+                    </button>
+                  </div>
                 </div>
 
                 {expensesLoading ? (
