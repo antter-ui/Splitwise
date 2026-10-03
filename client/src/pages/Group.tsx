@@ -4,6 +4,7 @@ import { useGroup, useAddMember, useRemoveMember, useDeleteGroup } from '../feat
 import { useGroupExpenses, useDeleteExpense } from '../features/expenses/hooks/useExpenses';
 import { useGroupBalances } from '../features/balances/hooks/useBalances';
 import { useGroupSettlements } from '../features/settlements/hooks/useSettlements';
+import { useGroupAnalytics } from '../features/analytics/hooks/useAnalytics';
 import { useMe } from '../features/auth/hooks/useAuth';
 import { useGroupSocket } from '../hooks/useGroupSocket';
 import { NotificationBell } from '../features/notifications/components/NotificationBell';
@@ -26,6 +27,8 @@ import {
   ArrowRight,
   HandCoins,
   CheckCircle2,
+  PieChart,
+  Activity,
 } from 'lucide-react';
 
 export const GroupPage: React.FC = () => {
@@ -36,6 +39,7 @@ export const GroupPage: React.FC = () => {
   const { data: expenses, isLoading: expensesLoading } = useGroupExpenses(id || '');
   const { data: balanceData, isLoading: balancesLoading } = useGroupBalances(id || '');
   const { data: settlements } = useGroupSettlements(id || '');
+  const { data: analyticsData } = useGroupAnalytics(id || '');
 
   // Enable real-time Socket.IO synchronization for this group
   useGroupSocket(id);
@@ -45,7 +49,7 @@ export const GroupPage: React.FC = () => {
   const deleteGroupMutation = useDeleteGroup();
   const deleteExpenseMutation = useDeleteExpense(id || '');
 
-  const [activeTab, setActiveTab] = useState<'expenses' | 'balances'>('expenses');
+  const [activeTab, setActiveTab] = useState<'expenses' | 'balances' | 'analytics'>('expenses');
   const [inviteEmail, setInviteEmail] = useState('');
   const [actionError, setActionError] = useState<string | null>(null);
   const [showAddExpense, setShowAddExpense] = useState(false);
@@ -279,6 +283,18 @@ export const GroupPage: React.FC = () => {
               </span>
             )}
           </button>
+
+          <button
+            onClick={() => setActiveTab('analytics')}
+            className={`pb-3 px-3 text-sm font-semibold flex items-center gap-2 border-b-2 transition-all cursor-pointer ${
+              activeTab === 'analytics'
+                ? 'border-indigo-500 text-white'
+                : 'border-transparent text-gray-400 hover:text-gray-200'
+            }`}
+          >
+            <PieChart className="w-4 h-4" />
+            <span>Analytics & Activity</span>
+          </button>
         </div>
 
         {/* Content based on Active Tab */}
@@ -500,7 +516,7 @@ export const GroupPage: React.FC = () => {
               </div>
             </div>
           </div>
-        ) : (
+        ) : activeTab === 'balances' ? (
           /* Balances & Debt Simplifier View */
           <div className="space-y-6">
             {/* Simplified Debts Box */}
@@ -651,6 +667,95 @@ export const GroupPage: React.FC = () => {
                 </div>
               </div>
             )}
+          </div>
+        ) : (
+          /* Analytics & Activity View */
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* Category Spending Breakdown */}
+              <div className="md:col-span-1 glass-card rounded-2xl p-6 border border-gray-800/80 space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-base font-bold text-white flex items-center gap-2">
+                    <PieChart className="w-4 h-4 text-indigo-400" />
+                    <span>Spending by Category</span>
+                  </h3>
+                  <span className="text-xs font-semibold text-indigo-400">
+                    {group.currency} {analyticsData?.totalSpent.toFixed(2) || '0.00'}
+                  </span>
+                </div>
+
+                {analyticsData?.categoryBreakdown && analyticsData.categoryBreakdown.length > 0 ? (
+                  <div className="space-y-3 pt-2">
+                    {analyticsData.categoryBreakdown.map((cat) => (
+                      <div key={cat.category} className="space-y-1">
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="text-gray-300 font-medium">{cat.category}</span>
+                          <span className="text-gray-400">
+                            {group.currency} {cat.totalAmount.toFixed(2)} ({cat.percentage}%)
+                          </span>
+                        </div>
+                        <div className="h-2 w-full bg-gray-900 rounded-full overflow-hidden border border-gray-800">
+                          <div
+                            className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full"
+                            style={{ width: `${Math.min(cat.percentage, 100)}%` }}
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-xs text-gray-500 py-6 text-center">
+                    No expense data for category analytics
+                  </p>
+                )}
+              </div>
+
+              {/* Activity Timeline */}
+              <div className="md:col-span-2 glass-card rounded-2xl p-6 border border-gray-800/80 space-y-4">
+                <h3 className="text-base font-bold text-white flex items-center gap-2">
+                  <Activity className="w-4 h-4 text-indigo-400" />
+                  <span>Activity Feed</span>
+                </h3>
+
+                {analyticsData?.recentActivities && analyticsData.recentActivities.length > 0 ? (
+                  <div className="space-y-3">
+                    {analyticsData.recentActivities.map((act) => (
+                      <div
+                        key={act.id}
+                        className="p-3.5 rounded-xl bg-gray-900/50 border border-gray-800/80 flex items-center justify-between gap-3 text-xs"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 rounded-xl bg-gray-900 border border-gray-800 shrink-0">
+                            {act.type === 'expense' ? (
+                              <Receipt className="w-4 h-4 text-indigo-400" />
+                            ) : (
+                              <HandCoins className="w-4 h-4 text-emerald-400" />
+                            )}
+                          </div>
+                          <div>
+                            <p className="font-semibold text-white">{act.title}</p>
+                            <p className="text-[11px] text-gray-400">{act.subtitle}</p>
+                          </div>
+                        </div>
+
+                        <div className="text-right shrink-0">
+                          <span className="font-bold text-white block">
+                            {act.currency} {act.amount.toFixed(2)}
+                          </span>
+                          <span className="text-[10px] text-gray-500">
+                            {formatDate(act.createdAt.toString())}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-xs text-gray-500 py-6 text-center">
+                    No recent activity in this group
+                  </p>
+                )}
+              </div>
+            </div>
           </div>
         )}
       </main>

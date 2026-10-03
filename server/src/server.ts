@@ -11,6 +11,8 @@ import { groupExpenseRouter, individualExpenseRouter } from './modules/expenses/
 import { groupBalancesRouter, userBalancesRouter } from './modules/balances/balances.routes';
 import { settlementRouter } from './modules/settlements/settlements.routes';
 import { notificationRoutes } from './modules/notifications/notifications.routes';
+import { groupAnalyticsRouter, userAnalyticsRouter } from './modules/analytics/analytics.routes';
+import { generalLimiter } from './middleware/rateLimiter';
 import { errorHandler, ApiError } from './middleware/errorHandler';
 import { initSocket } from './socket/socket';
 
@@ -29,6 +31,7 @@ app.use(
     credentials: true,
   })
 );
+app.use(generalLimiter);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
@@ -49,7 +52,9 @@ app.use('/api/groups/:groupId/expenses', groupExpenseRouter);
 app.use('/api/expenses', individualExpenseRouter);
 app.use('/api/groups/:groupId/balances', groupBalancesRouter);
 app.use('/api/groups/:groupId/settlements', settlementRouter);
+app.use('/api/groups/:groupId/analytics', groupAnalyticsRouter);
 app.use('/api/users/balances', userBalancesRouter);
+app.use('/api/users/analytics', userAnalyticsRouter);
 app.use('/api/notifications', notificationRoutes);
 
 // ─── 404 Handler ──────────────────────────────────────────────────────────────
