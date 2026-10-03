@@ -1,7 +1,9 @@
 # SplitSync — Actionable Build Plan
 
 > Derived from `SplitSync_Full_Stack_Architecture.md`
-> Follow phases **in order**. Never jump ahead. Each phase must be working before moving to the next.
+> **GitHub:** https://github.com/antter-ui/Splitwise
+> **Rule:** After every phase completes → `git push origin main`
+
 
 ---
 
@@ -10,7 +12,7 @@
 | Phase | Name | Status |
 |---|---|---|
 | 0 | Environment & Repo Setup | ✅ DONE — 2026-10-03 |
-| 1 | Auth (Backend + Frontend) | ⬜ TODO |
+| 1 | Auth (Backend + Frontend) | ✅ DONE — 2026-10-03 |
 | 2 | Groups | ⬜ TODO |
 | 3 | Expenses | ⬜ TODO |
 | 4 | Balance Engine + Debt Algorithm | ⬜ TODO |
@@ -49,7 +51,7 @@ splitwise/
 
 ---
 
-## ⬜ Phase 1 — Auth (Backend + Frontend)
+## ✅ Phase 1 — Auth (Backend + Frontend)
 > **Start here after environment setup.**
 
 ### 1A — Backend Auth

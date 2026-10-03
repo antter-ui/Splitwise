@@ -17,9 +17,10 @@ npm-debug.log*
 .DS_Store
 Thumbs.db
 
-# IDE
+# IDE & Tooling
 .vscode/
 .idea/
+.deslop/
 
 # Vite
 client/dist/

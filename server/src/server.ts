@@ -2,27 +2,45 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
-import dotenv from 'dotenv';
 import { connectDB } from './config/database';
-
-dotenv.config();
+import { env } from './config/env';
+import { authRoutes } from './modules/auth/auth.routes';
+import { errorHandler, ApiError } from './middleware/errorHandler';
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = env.PORT;
 
-// ─── Middleware ───────────────────────────────────────────────────────────────
+// ─── Security & Parsers ───────────────────────────────────────────────────────
 app.use(helmet());
-app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:5173',
-  credentials: true,
-}));
+app.use(
+  cors({
+    origin: env.CLIENT_URL,
+    credentials: true,
+  })
+);
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 // ─── Health Check ─────────────────────────────────────────────────────────────
 app.get('/api/health', (_req, res) => {
-  res.json({ status: 'ok', message: 'SplitSync server is running 🚀' });
+  res.json({
+    status: 'ok',
+    message: 'SplitSync server is running 🚀',
+    timestamp: new Date().toISOString(),
+  });
 });
+
+// ─── Routes ───────────────────────────────────────────────────────────────────
+app.use('/api/auth', authRoutes);
+
+// ─── 404 Handler ──────────────────────────────────────────────────────────────
+app.use((_req, _res, next) => {
+  next(ApiError.notFound('The requested endpoint was not found'));
+});
+
+// ─── Error Handling ───────────────────────────────────────────────────────────
+app.use(errorHandler);
 
 // ─── Start ────────────────────────────────────────────────────────────────────
 const start = async () => {
