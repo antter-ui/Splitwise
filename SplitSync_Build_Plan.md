@@ -17,8 +17,8 @@
 | 3 | Expenses | ✅ DONE — 2026-10-03 |
 | 4 | Balance Engine + Debt Algorithm | ✅ DONE — 2026-10-03 |
 | 5 | Settlements | ✅ DONE — 2026-10-03 |
-| 6 | Real-Time (Socket.IO) | ⬜ TODO |
-| 7 | Notifications | ⬜ TODO |
+| 6 | Real-Time (Socket.IO) | ✅ DONE — 2026-10-03 |
+| 7 | Notifications | ✅ DONE — 2026-10-03 |
 | 8 | Analytics & Activity Feed | ⬜ TODO |
 | 9 | Production Features | ⬜ TODO |
 | 10 | Testing | ⬜ TODO |
@@ -176,7 +176,7 @@ splitwise/
 
 ---
 
-## ⬜ Phase 6 — Real-Time (Socket.IO)
+## ✅ Phase 6 — Real-Time (Socket.IO)
 
 **Backend:** Attach Socket.IO, JWT on handshake, emit events after DB writes
 **Events:** `expense:created`, `expense:updated`, `expense:deleted`, `settlement:created`, `notification:new`
@@ -186,7 +186,7 @@ splitwise/
 
 ---
 
-## ⬜ Phase 7 — Notifications
+## ✅ Phase 7 — Notifications
 
 - Notification model: userId, type, title, message, relatedEntity, read, createdAt
 - Auto-create on expense/settlement/member events

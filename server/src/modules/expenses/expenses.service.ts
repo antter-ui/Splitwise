@@ -3,6 +3,8 @@ import { Expense, IExpense, IParticipant } from '../../models/Expense';
 import { Group } from '../../models/Group';
 import { ApiError } from '../../middleware/errorHandler';
 import { CreateExpenseInput } from './expenses.validation';
+import { emitToGroup } from '../../socket/socket';
+import { NotificationsService } from '../notifications/notifications.service';
 
 export class ExpensesService {
   private static calculateParticipantAmounts(
@@ -128,11 +130,31 @@ export class ExpensesService {
       createdBy: new Types.ObjectId(requestingUserId),
     });
 
-    return expense.populate([
+    await expense.populate([
       { path: 'paidBy', select: 'name email avatar' },
       { path: 'createdBy', select: 'name email avatar' },
       { path: 'participants.user', select: 'name email avatar' },
     ]);
+
+    // Real-time broadcast
+    emitToGroup(groupId, 'expense:created', expense);
+
+    // Notify participants
+    const payerName = (expense.paidBy as any)?.name || 'Someone';
+    for (const p of expense.participants) {
+      const participantUserId = p.user._id ? p.user._id.toString() : p.user.toString();
+      if (participantUserId !== requestingUserId) {
+        NotificationsService.createNotification({
+          userId: participantUserId,
+          type: 'expense_added',
+          title: 'New Expense Added',
+          message: `${payerName} added "${expense.description}" (${expense.currency} ${expense.amount})`,
+          link: `/groups/${groupId}`,
+        }).catch((err) => console.error('Notification error:', err));
+      }
+    }
+
+    return expense;
   }
 
   static async getGroupExpenses(groupId: string, requestingUserId: string): Promise<IExpense[]> {
@@ -191,5 +213,8 @@ export class ExpensesService {
     }
 
     await Expense.findByIdAndDelete(expenseId);
+
+    // Real-time broadcast
+    emitToGroup(expense.groupId.toString(), 'expense:deleted', { expenseId });
   }
 }

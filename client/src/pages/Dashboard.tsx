@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useMe, useLogout } from '../features/auth/hooks/useAuth';
 import { useGroups, useCreateGroup } from '../features/groups/hooks/useGroups';
 import { useGlobalBalances } from '../features/balances/hooks/useBalances';
+import { NotificationBell } from '../features/notifications/components/NotificationBell';
 import { useNavigate, Link } from 'react-router-dom';
 import {
   Wallet,
@@ -98,8 +99,10 @@ export const Dashboard: React.FC = () => {
             </div>
           </div>
 
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-3 pl-4 border-l border-gray-800">
+          <div className="flex items-center gap-3">
+            <NotificationBell />
+
+            <div className="flex items-center gap-3 pl-3 border-l border-gray-800">
               <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-600 flex items-center justify-center text-xs font-semibold text-white">
                 {getInitials(user?.name)}
               </div>

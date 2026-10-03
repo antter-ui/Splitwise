@@ -5,6 +5,8 @@ import { useGroupExpenses, useDeleteExpense } from '../features/expenses/hooks/u
 import { useGroupBalances } from '../features/balances/hooks/useBalances';
 import { useGroupSettlements } from '../features/settlements/hooks/useSettlements';
 import { useMe } from '../features/auth/hooks/useAuth';
+import { useGroupSocket } from '../hooks/useGroupSocket';
+import { NotificationBell } from '../features/notifications/components/NotificationBell';
 import { AddExpenseModal } from '../features/expenses/components/AddExpenseModal';
 import { SettleUpModal } from '../features/settlements/components/SettleUpModal';
 import {
@@ -34,6 +36,9 @@ export const GroupPage: React.FC = () => {
   const { data: expenses, isLoading: expensesLoading } = useGroupExpenses(id || '');
   const { data: balanceData, isLoading: balancesLoading } = useGroupBalances(id || '');
   const { data: settlements } = useGroupSettlements(id || '');
+
+  // Enable real-time Socket.IO synchronization for this group
+  useGroupSocket(id);
 
   const addMemberMutation = useAddMember(id || '');
   const removeMemberMutation = useRemoveMember(id || '');
@@ -175,6 +180,8 @@ export const GroupPage: React.FC = () => {
           </Link>
 
           <div className="flex items-center gap-3">
+            <NotificationBell />
+
             <button
               onClick={() => openSettleModal()}
               className="px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600/20 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-600/30 transition-all flex items-center gap-1.5 cursor-pointer"
