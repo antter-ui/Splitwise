@@ -15,8 +15,8 @@
 | 1 | Auth (Backend + Frontend) | ✅ DONE — 2026-10-03 |
 | 2 | Groups | ✅ DONE — 2026-10-03 |
 | 3 | Expenses | ✅ DONE — 2026-10-03 |
-| 4 | Balance Engine + Debt Algorithm | ⬜ TODO |
-| 5 | Settlements | ⬜ TODO |
+| 4 | Balance Engine + Debt Algorithm | ✅ DONE — 2026-10-03 |
+| 5 | Settlements | ✅ DONE — 2026-10-03 |
 | 6 | Real-Time (Socket.IO) | ⬜ TODO |
 | 7 | Notifications | ⬜ TODO |
 | 8 | Analytics & Activity Feed | ⬜ TODO |
@@ -142,7 +142,7 @@ splitwise/
 
 ---
 
-## ⬜ Phase 4 — Balance Engine (Core Algorithm)
+## ✅ Phase 4 — Balance Engine (Core Algorithm)
 
 > ⚠️ This is the most important algorithmic phase. Understand the algorithm — don't copy-paste it.
 
@@ -165,7 +165,7 @@ splitwise/
 
 ---
 
-## ⬜ Phase 5 — Settlements
+## ✅ Phase 5 — Settlements
 
 - Settlement model: groupId, from, to, amount, currency, note
 - `POST /api/groups/:groupId/settlements`

@@ -7,6 +7,8 @@ import { env } from './config/env';
 import { authRoutes } from './modules/auth/auth.routes';
 import { groupRoutes } from './modules/groups/groups.routes';
 import { groupExpenseRouter, individualExpenseRouter } from './modules/expenses/expenses.routes';
+import { groupBalancesRouter, userBalancesRouter } from './modules/balances/balances.routes';
+import { settlementRouter } from './modules/settlements/settlements.routes';
 import { errorHandler, ApiError } from './middleware/errorHandler';
 
 const app = express();
@@ -38,6 +40,9 @@ app.use('/api/auth', authRoutes);
 app.use('/api/groups', groupRoutes);
 app.use('/api/groups/:groupId/expenses', groupExpenseRouter);
 app.use('/api/expenses', individualExpenseRouter);
+app.use('/api/groups/:groupId/balances', groupBalancesRouter);
+app.use('/api/groups/:groupId/settlements', settlementRouter);
+app.use('/api/users/balances', userBalancesRouter);
 
 // ─── 404 Handler ──────────────────────────────────────────────────────────────
 app.use((_req, _res, next) => {

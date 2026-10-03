@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useMe, useLogout } from '../features/auth/hooks/useAuth';
 import { useGroups, useCreateGroup } from '../features/groups/hooks/useGroups';
+import { useGlobalBalances } from '../features/balances/hooks/useBalances';
 import { useNavigate, Link } from 'react-router-dom';
 import {
   Wallet,
@@ -21,6 +22,7 @@ import {
 export const Dashboard: React.FC = () => {
   const { data: user } = useMe();
   const { data: groups, isLoading: groupsLoading } = useGroups();
+  const { data: globalBalances } = useGlobalBalances();
   const createGroupMutation = useCreateGroup();
   const logoutMutation = useLogout();
   const navigate = useNavigate();
@@ -149,15 +151,26 @@ export const Dashboard: React.FC = () => {
           </div>
         </div>
 
-        {/* Balance Overview Mockup (Ready for Phase 3/4) */}
+        {/* Balance Overview Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="glass-card rounded-xl p-5 border border-gray-800/80">
             <div className="flex items-center justify-between text-gray-400 mb-2">
               <span className="text-xs font-medium uppercase tracking-wider">Total Balance</span>
               <Wallet className="w-4 h-4 text-indigo-400" />
             </div>
-            <p className="text-2xl font-bold text-white">₹0.00</p>
-            <p className="text-[11px] text-gray-500 mt-1">All settled up</p>
+            <p
+              className={`text-2xl font-bold ${
+                (globalBalances?.totalBalance || 0) > 0
+                  ? 'text-emerald-400'
+                  : (globalBalances?.totalBalance || 0) < 0
+                  ? 'text-rose-400'
+                  : 'text-white'
+              }`}
+            >
+              {(globalBalances?.totalBalance || 0) >= 0 ? '+' : ''}
+              {user?.currency || 'INR'} {(globalBalances?.totalBalance || 0).toFixed(2)}
+            </p>
+            <p className="text-[11px] text-gray-500 mt-1">Across all groups</p>
           </div>
 
           <div className="glass-card rounded-xl p-5 border border-gray-800/80">
@@ -165,8 +178,10 @@ export const Dashboard: React.FC = () => {
               <span className="text-xs font-medium uppercase tracking-wider">You are owed</span>
               <TrendingUp className="w-4 h-4 text-emerald-400" />
             </div>
-            <p className="text-2xl font-bold text-emerald-400">₹0.00</p>
-            <p className="text-[11px] text-gray-500 mt-1">Across all groups</p>
+            <p className="text-2xl font-bold text-emerald-400">
+              +{user?.currency || 'INR'} {(globalBalances?.totalOwed || 0).toFixed(2)}
+            </p>
+            <p className="text-[11px] text-gray-500 mt-1">From friends</p>
           </div>
 
           <div className="glass-card rounded-xl p-5 border border-gray-800/80">
@@ -174,8 +189,10 @@ export const Dashboard: React.FC = () => {
               <span className="text-xs font-medium uppercase tracking-wider">You owe</span>
               <TrendingDown className="w-4 h-4 text-rose-400" />
             </div>
-            <p className="text-2xl font-bold text-rose-400">₹0.00</p>
-            <p className="text-[11px] text-gray-500 mt-1">Across all groups</p>
+            <p className="text-2xl font-bold text-rose-400">
+              -{user?.currency || 'INR'} {(globalBalances?.totalOwe || 0).toFixed(2)}
+            </p>
+            <p className="text-[11px] text-gray-500 mt-1">To friends</p>
           </div>
         </div>
 
