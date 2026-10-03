@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useGroup, useAddMember, useRemoveMember, useDeleteGroup } from '../features/groups/hooks/useGroups';
+import { useGroupExpenses, useDeleteExpense } from '../features/expenses/hooks/useExpenses';
 import { useMe } from '../features/auth/hooks/useAuth';
+import { AddExpenseModal } from '../features/expenses/components/AddExpenseModal';
 import {
   ArrowLeft,
   Users,
@@ -13,6 +15,8 @@ import {
   Crown,
   Receipt,
   PlusCircle,
+  Tag,
+  Calendar,
 } from 'lucide-react';
 
 export const GroupPage: React.FC = () => {
@@ -20,13 +24,16 @@ export const GroupPage: React.FC = () => {
   const navigate = useNavigate();
   const { data: currentUser } = useMe();
   const { data: group, isLoading, error } = useGroup(id || '');
+  const { data: expenses, isLoading: expensesLoading } = useGroupExpenses(id || '');
 
   const addMemberMutation = useAddMember(id || '');
   const removeMemberMutation = useRemoveMember(id || '');
   const deleteGroupMutation = useDeleteGroup();
+  const deleteExpenseMutation = useDeleteExpense(id || '');
 
   const [inviteEmail, setInviteEmail] = useState('');
   const [actionError, setActionError] = useState<string | null>(null);
+  const [showAddExpense, setShowAddExpense] = useState(false);
 
   if (isLoading) {
     return (
@@ -103,6 +110,15 @@ export const GroupPage: React.FC = () => {
     }
   };
 
+  const handleDeleteExpense = async (expenseId: string, desc: string) => {
+    if (!window.confirm(`Delete expense "${desc}"?`)) return;
+    try {
+      await deleteExpenseMutation.mutateAsync(expenseId);
+    } catch (err: any) {
+      setActionError(err.message || 'Failed to delete expense.');
+    }
+  };
+
   const getInitials = (name?: string) => {
     if (!name) return 'U';
     return name
@@ -111,6 +127,11 @@ export const GroupPage: React.FC = () => {
       .join('')
       .toUpperCase()
       .substring(0, 2);
+  };
+
+  const formatDate = (isoString: string) => {
+    const d = new Date(isoString);
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   };
 
   return (
@@ -160,9 +181,15 @@ export const GroupPage: React.FC = () => {
             </p>
           </div>
 
-          <div className="p-4 rounded-xl bg-gray-900/90 border border-gray-800 text-center min-w-[130px]">
-            <span className="text-xs text-gray-400 block mb-1">Group Currency</span>
-            <span className="text-xl font-bold text-indigo-400">{group.currency}</span>
+          <div className="flex items-center gap-3">
+            <div className="p-4 rounded-xl bg-gray-900/90 border border-gray-800 text-center min-w-[120px]">
+              <span className="text-xs text-gray-400 block mb-1">Expenses</span>
+              <span className="text-xl font-bold text-purple-400">{expenses?.length || 0}</span>
+            </div>
+            <div className="p-4 rounded-xl bg-gray-900/90 border border-gray-800 text-center min-w-[120px]">
+              <span className="text-xs text-gray-400 block mb-1">Currency</span>
+              <span className="text-xl font-bold text-indigo-400">{group.currency}</span>
+            </div>
           </div>
         </div>
 
@@ -173,7 +200,7 @@ export const GroupPage: React.FC = () => {
           </div>
         )}
 
-        {/* Two-Column Grid: Members Management & Expenses Placeholder */}
+        {/* Two-Column Grid: Members Management & Expenses Area */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Members Column */}
           <div className="lg:col-span-1 space-y-4">
@@ -263,7 +290,7 @@ export const GroupPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Expenses & Activities Area (Phase 3 Hook) */}
+          {/* Expenses Column */}
           <div className="lg:col-span-2 space-y-4">
             <div className="glass-card rounded-2xl p-6 border border-gray-800/80">
               <div className="flex items-center justify-between mb-6">
@@ -278,27 +305,119 @@ export const GroupPage: React.FC = () => {
                 </div>
 
                 <button
-                  disabled
-                  className="px-3.5 py-2 bg-indigo-600/30 text-indigo-300 border border-indigo-500/20 rounded-xl text-xs font-semibold flex items-center gap-1.5 cursor-not-allowed opacity-75"
-                  title="Coming in Phase 3"
+                  onClick={() => setShowAddExpense(true)}
+                  className="px-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-md shadow-indigo-500/20 cursor-pointer transition-all"
                 >
                   <PlusCircle className="w-4 h-4" />
-                  <span>Add Expense (Phase 3)</span>
+                  <span>Add Expense</span>
                 </button>
               </div>
 
-              {/* Clean Empty State */}
-              <div className="py-12 text-center rounded-xl bg-gray-900/30 border border-dashed border-gray-800">
-                <Receipt className="w-10 h-10 text-gray-600 mx-auto mb-3" />
-                <h4 className="text-sm font-semibold text-gray-300">No expenses recorded yet</h4>
-                <p className="text-xs text-gray-500 max-w-sm mx-auto mt-1">
-                  Once we build Phase 3 (Expenses), you will be able to split equal, unequal, percentage, and exact amounts across all group members.
-                </p>
-              </div>
+              {/* Expense List */}
+              {expensesLoading ? (
+                <div className="py-12 flex justify-center">
+                  <Loader2 className="w-6 h-6 text-indigo-500 animate-spin" />
+                </div>
+              ) : expenses && expenses.length > 0 ? (
+                <div className="space-y-3">
+                  {expenses.map((expense) => {
+                    const isExpensePayer = expense.paidBy?._id === currentUser?._id;
+                    const myShare = expense.participants.find(
+                      (p) => p.user?._id === currentUser?._id
+                    );
+
+                    return (
+                      <div
+                        key={expense._id}
+                        className="p-4 rounded-xl bg-gray-900/60 border border-gray-800/80 hover:border-gray-700 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+                      >
+                        <div className="flex items-start gap-3">
+                          <div className="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center shrink-0 mt-0.5">
+                            <Tag className="w-5 h-5 text-indigo-400" />
+                          </div>
+
+                          <div className="space-y-1">
+                            <div className="flex items-center gap-2">
+                              <h4 className="text-sm font-bold text-white">{expense.description}</h4>
+                              <span className="text-[10px] px-2 py-0.5 rounded-full bg-gray-800 text-gray-300 font-medium">
+                                {expense.category}
+                              </span>
+                            </div>
+
+                            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-gray-400">
+                              <span>
+                                Paid by{' '}
+                                <strong className="text-gray-200">
+                                  {isExpensePayer ? 'you' : expense.paidBy?.name}
+                                </strong>
+                              </span>
+                              <span>•</span>
+                              <span className="capitalize">{expense.splitType} split</span>
+                              <span>•</span>
+                              <span className="flex items-center gap-1">
+                                <Calendar className="w-3 h-3 text-gray-500" />
+                                <span>{formatDate(expense.createdAt)}</span>
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center justify-between sm:justify-end gap-4 border-t sm:border-t-0 pt-3 sm:pt-0 border-gray-800/60">
+                          <div className="text-right">
+                            <p className="text-base font-bold text-white">
+                              {expense.currency} {expense.amount.toFixed(2)}
+                            </p>
+                            {myShare && (
+                              <p className="text-[11px] text-gray-400">
+                                Your share: {expense.currency} {myShare.amount.toFixed(2)}
+                              </p>
+                            )}
+                          </div>
+
+                          <button
+                            onClick={() => handleDeleteExpense(expense._id, expense.description)}
+                            disabled={deleteExpenseMutation.isPending}
+                            className="p-1.5 rounded-lg text-gray-500 hover:text-rose-400 hover:bg-rose-500/10 transition-colors cursor-pointer"
+                            title="Delete Expense"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="py-12 text-center rounded-xl bg-gray-900/30 border border-dashed border-gray-800">
+                  <Receipt className="w-10 h-10 text-gray-600 mx-auto mb-3" />
+                  <h4 className="text-sm font-semibold text-gray-300">No expenses recorded yet</h4>
+                  <p className="text-xs text-gray-500 max-w-sm mx-auto mt-1 mb-4">
+                    Click "Add Expense" above to record a bill and split it with group members.
+                  </p>
+                  <button
+                    onClick={() => setShowAddExpense(true)}
+                    className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-semibold inline-flex items-center gap-1.5 cursor-pointer transition-all"
+                  >
+                    <PlusCircle className="w-4 h-4" />
+                    <span>Record First Expense</span>
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>
       </main>
+
+      {/* Add Expense Modal */}
+      {showAddExpense && currentUser && (
+        <AddExpenseModal
+          groupId={group._id}
+          currency={group.currency}
+          members={group.members}
+          currentUserId={currentUser._id}
+          onClose={() => setShowAddExpense(false)}
+        />
+      )}
     </div>
   );
 };

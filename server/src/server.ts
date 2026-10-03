@@ -6,6 +6,7 @@ import { connectDB } from './config/database';
 import { env } from './config/env';
 import { authRoutes } from './modules/auth/auth.routes';
 import { groupRoutes } from './modules/groups/groups.routes';
+import { groupExpenseRouter, individualExpenseRouter } from './modules/expenses/expenses.routes';
 import { errorHandler, ApiError } from './middleware/errorHandler';
 
 const app = express();
@@ -35,6 +36,8 @@ app.get('/api/health', (_req, res) => {
 // ─── Routes ───────────────────────────────────────────────────────────────────
 app.use('/api/auth', authRoutes);
 app.use('/api/groups', groupRoutes);
+app.use('/api/groups/:groupId/expenses', groupExpenseRouter);
+app.use('/api/expenses', individualExpenseRouter);
 
 // ─── 404 Handler ──────────────────────────────────────────────────────────────
 app.use((_req, _res, next) => {
