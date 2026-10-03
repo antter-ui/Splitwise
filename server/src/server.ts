@@ -3,6 +3,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
+import { connectDB } from './config/database';
 
 dotenv.config();
 
@@ -24,8 +25,11 @@ app.get('/api/health', (_req, res) => {
 });
 
 // ─── Start ────────────────────────────────────────────────────────────────────
-app.listen(PORT, () => {
-  console.log(`[server] Running on http://localhost:${PORT}`);
-});
+const start = async () => {
+  await connectDB();
+  app.listen(PORT, () => {
+    console.log(`[server] Running on http://localhost:${PORT}`);
+  });
+};
 
-export default app;
+start();

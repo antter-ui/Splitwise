@@ -9,7 +9,7 @@
 
 | Phase | Name | Status |
 |---|---|---|
-| 0 | Environment & Repo Setup | ✅ DONE |
+| 0 | Environment & Repo Setup | ✅ DONE — 2026-10-03 |
 | 1 | Auth (Backend + Frontend) | ⬜ TODO |
 | 2 | Groups | ⬜ TODO |
 | 3 | Expenses | ⬜ TODO |
