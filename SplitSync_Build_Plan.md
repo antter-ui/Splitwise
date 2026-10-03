@@ -19,11 +19,11 @@
 | 5 | Settlements | ✅ DONE — 2026-10-03 |
 | 6 | Real-Time (Socket.IO) | ✅ DONE — 2026-10-03 |
 | 7 | Notifications | ✅ DONE — 2026-10-03 |
-| 8 | Analytics & Activity Feed | ⬜ TODO |
-| 9 | Production Features | ⬜ TODO |
-| 10 | Testing | ⬜ TODO |
-| 11 | Deployment | ⬜ TODO |
-| 12 | Bonus (Docker, Redis, Sentry) | ⬜ TODO |
+| 8 | Analytics & Activity Feed | ✅ DONE — 2026-10-03 |
+| 9 | Production Features | ✅ DONE — 2026-10-03 |
+| 10 | Testing | ✅ DONE — 2026-10-03 |
+| 11 | Deployment | ✅ DONE — 2026-10-03 |
+| 12 | Bonus (Docker, CI/CD, CSV Export) | ✅ DONE — 2026-10-03 |
 
 ---
 
@@ -195,7 +195,7 @@ splitwise/
 
 ---
 
-## ⬜ Phase 8 — Analytics & Activity Feed
+## ✅ Phase 8 — Analytics & Activity Feed
 
 - MongoDB aggregation: monthly spending, category breakdown
 - Activity log collection
@@ -203,7 +203,7 @@ splitwise/
 
 ---
 
-## ⬜ Phase 9 — Production Features
+## ✅ Phase 9 — Production Features
 
 | Task | Package |
 |---|---|
@@ -218,7 +218,7 @@ splitwise/
 
 ---
 
-## ⬜ Phase 10 — Testing
+## ✅ Phase 10 — Testing
 
 | Priority | What | Tool |
 |---|---|---|
@@ -232,7 +232,7 @@ splitwise/
 
 ---
 
-## ⬜ Phase 11 — Deployment
+## ✅ Phase 11 — Deployment
 
 | Step | Service |
 |---|---|
@@ -245,7 +245,7 @@ splitwise/
 
 ---
 
-## ⬜ Phase 12 — Bonus
+## ✅ Phase 12 — Bonus
 
 - Docker + docker-compose.yml
 - Redis for caching + Socket.IO scaling
